@@ -5,7 +5,12 @@
     <input id="gender" placeholder="性别" v-model.trim="data.gender"/>
     <input id="age" placeholder="年龄" v-model.trim="data.age"/>
     <input id="className" placeholder="班级" v-model.trim="data.className"/>
-    <button class="add" @click="add">添加</button>
+    <button class="add" @click="add" v-if="addLoading">添加</button>
+    <!-- <div class="loading-box" v-else> -->
+    <div class="spinner-border text-secondary" role="status" v-else>
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <!-- </div> -->
   </div>
 </template>
 
@@ -22,9 +27,15 @@ export default {
       }
     }
   },
+  props: {
+    addLoading: {
+      type: Boolean
+    }
+  },
   methods: {
     add () {
       this.$emit('add', { ...this.data })
+      this.isShow = false
       this.data = {
         sid: '',
         name: '',

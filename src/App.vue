@@ -8,9 +8,12 @@
     @close="handleClose">
     </EditPage>
     <HeadPage
+    :addLoading="addLoading"
     @add="handleAdd">
     </HeadPage>
     <BodyPage
+    :editID="editID"
+    :delID="delID"
     :stusObj="studentsObj"
     @del="handleDel"
     @open="handleOpen">
@@ -45,7 +48,10 @@ export default {
   },
   data () {
     return {
-      indexID: '',
+      addLoading: true,
+      delID: null,
+      editID: null,
+      indexID: null,
       isShow: false,
       editObj: {},
       studentsObj: [
@@ -66,28 +72,47 @@ export default {
       this.studentsObj = res.data
     },
     async handleAdd (data) {
-      console.log('1. handleAdd 触发，data =', data)
-      await addStudent(data)
-      console.log('2. addStudent 完成')
-      this.get()
-      console.log('3. get 完成，studentsObj =', this.studentsObj)
+      try {
+        this.addLoading = false
+        /* console.log('1. handleAdd 触发，data =', data) */
+        await addStudent(data)
+        /* console.log('2. addStudent 完成') */
+        await this.get()
+        /* console.log('3. get 完成，studentsObj =', this.studentsObj) */
+      } finally {
+        this.addLoading = true
+      }
     },
     async handleDel (id) {
-      console.log('1. handleDel 触发，id =', id)
-      await delStudent(id)
-      console.log('2. delStudent 完成')
-      this.get()
-      console.log('3. get 完成，studentsObj =', this.studentsObj)
+      try {
+        this.delID = id
+        /* console.log('1. handleDel 触发，id =', id) */
+        await delStudent(id)
+        /* console.log('2. delStudent 完成') */
+        await this.get()
+        /* console.log('3. get 完成，studentsObj =', this.studentsObj) */
+      } finally {
+        this.delID = null
+      }
     },
     async handleEdit (data) {
-      await editStudent(data)
-      this.get()
+      try {
+        this.editID = data.id
+        await editStudent(data)
+        await this.get()
+      } finally {
+        this.editID = null
+      }
     },
     handleOpen (id) {
-      this.indexID = id
-      this.editObj = this.studentsObj.find((item) => item.id === id)
-      console.log(this.editObj)
-      this.isShow = true
+      try {
+        this.indexID = id
+        this.editObj = this.studentsObj.find((item) => item.id === id)
+        console.log(this.editObj)
+        this.isShow = true
+      } finally {
+        this.indexID = null
+      }
     },
     handleClose (value) {
       this.isShow = value
